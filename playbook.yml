@@ -1,0 +1,32 @@
+---
+- name: Configure configurable site
+  hosts: all
+  become: yes
+  gather_facts: false
+  vars:
+    app_name: MySite
+    root_dir: /var/www/mysite
+    nginx_port: 8080
+  tasks:
+    - name: Create site directory {{ root_dir }}
+      file:
+        path: "{{ root_dir }}"
+        state: directory
+        mode: '0755'
+
+    - name: Create page for {{ app_name }}
+      template:
+        src: templates/index.html.j2
+        dest: "{{ root_dir }}/index.html"
+        mode: '0644'
+
+    - name: Configure nginx on port {{ nginx_port }}
+      template:
+        src: templates/nginx.conf.j2
+        dest: /etc/nginx/nginx.conf
+        mode: '0644'
+
+    - name: Reload nginx
+      service:
+        name: nginx
+        state: reloaded
